@@ -1,23 +1,29 @@
-name: CI-CD pipeline
+name: CI-CD Pipeline
 on:
   push:
     branches:
       - main
 jobs:
-  build:
+  docker:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Code
+      - name: checkout-code
         uses: actions/checkout@v4
-
-      - name: Login to DockerHub
-        run: echo "${{secrets.DOCKER_PASSWORD}}" | docker login -u "${{secrets.DOCKER_USERNAME}}" --password-stdin
-
-      - name: Build Docker Image
-        run: docker build -t ${{secrets.DOCKER_USERNAME}}/my-docker-app .
-    
-      - name: List Docker images
-        run: docker images
-      
-      - name: Push Docker Image
-        run: docker push ${{secrets.DOCKER_USERNAME}}/my-docker-app
+      - name: Login to Dockerhub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/my-ci-cd .
+      - name: Push image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/my-ci-cd
+      - name: Run Container
+        run: docker run -d -p 5000:5000 --name test-cont ${{ secrets.DOCKER_USERNAME }}/my-ci-cd
+      - name: wait for app
+        run: sleep 5
+      - name: test application
+        run: curl http://localhost:5000
+      - name: stop container
+        run: docker stop test-cont
+      - name: remove cont
+        run: docker rm test-cont
+        
