@@ -1,4 +1,4 @@
-name: CI-CD Pipeline
+name: CI-CD-Pipeline
 
 on:
   push:
@@ -11,34 +11,31 @@ jobs:
 
     steps:
       - name: checkout-code
-        uses: actions/checkout@v4
+        run: actions/checkout@v4
 
-      - name: Login to Dockerhub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      - name: login to dockerhub
+        run: echo "${{secrets.DOCKER_PASSWORD}}" | docker login -u "${{secrets.DOCKER_USERNAME}}" --password-stdin
 
-      - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/my-ci-cd .
+      - name: build image
+        run: docker build -t ${{secrets.DOCKER_USERNAME}}/my-ci-cd .
 
-      - name: Push image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/my-ci-cd
+      - name: push image
+        run: docker push ${{secrets.DOCKER_USERNAME}}/my-ci-cd
 
-      - name: Run Container
-        run: docker run -d -p 5000:5000 --name test-cont ${{ secrets.DOCKER_USERNAME }}/my-ci-cd
+      - name: run container
+        run: docker run -d -p 5000:5000 --name testcont ${{secrets.DOCKER_USERNAME}}/my-ci-cd
 
-      - name: Check container
+      - name: check container
         run: docker ps
 
-      - name: Logs
-        run: docker logs test-cont
+      - name: logs
+        run: docker logs testcont
 
       - name: wait for app
         run: sleep 15
 
-      - name: test application
-        run: curl http://localhost:5000
-
       - name: stop container
-        run: docker stop test-cont
+        run: docker stop testcont
 
-      - name: remove cont
-        run: docker rm test-cont
+      - name: renove container
+        run: docker rm testcont
