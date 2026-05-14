@@ -23,13 +23,10 @@ A CI/CD pipeline using **GitHub Actions** that builds a Flask Docker image, push
 ## Run Locally
 
 ```bash
-# Build the image
 docker build -t flaskp .
 
-# Run the container
 docker run -d -p 5000:5000 flaskp
 
-# Test
 curl http://localhost:5000
 ```
 
