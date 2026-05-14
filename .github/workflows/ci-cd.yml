@@ -13,16 +13,16 @@ jobs:
         uses: actions/checkout@v4
 
       - name: GHCR login
-        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GITHUB_USERNAME }} --password-stdin
+        run: echo "${{ secrets.GITH_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GITH_USERNAME }} --password-stdin
 
       - name: Build docker image
-        run: docker build -t ghcr.io/${{ secrets.GITHUB_USERNAME }}/flaskp:latest .
+        run: docker build -t ghcr.io/${{ secrets.GITH_USERNAME }}/flaskp:latest .
         
       - name: Push to GHCR
-        run: docker push ghcr.io/${{ secrets.GITHUB_USERNAME }}/flaskp:latest
+        run: docker push ghcr.io/${{ secrets.GITH_USERNAME }}/flaskp:latest
 
       - name: Docker run
-        run: docker run -d --name testcont -p 5000:5000 ghcr.io/${{ secrets.GITHUB_USERNAME }}/flaskp:latest
+        run: docker run -d --name testcont -p 5000:5000 ghcr.io/${{ secrets.GITH_USERNAME }}/flaskp:latest
 
       - name: Check working status
         run: |
