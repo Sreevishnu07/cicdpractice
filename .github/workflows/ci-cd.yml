@@ -1,4 +1,4 @@
-name: CI-CD-Pipeline
+name: CI-CD pipeline
 
 on:
   push:
@@ -6,36 +6,42 @@ on:
       - main
 
 jobs:
-  docker:
+  test-build-push:
     runs-on: ubuntu-latest
-
     steps:
-      - name: checkout-code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: login to Github Content Registry
-        run: echo "${{secrets.GHCR_TOKEN}}" | docker login ghcr.io -u "${{secrets.GITH_USERNAME}}" --password-stdin
+      - name: GHCR login
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GITHUB_USERNAME }} --password-stdin
 
-      - name: build image
-        run: docker build -t ghcr.io/${{secrets.GITH_USERNAME}}/my-ci-cd:latest .
+      - name: Build docker image
+        run: docker build -t ghcr.io/${{ secrets.GITHUB_USERNAME }}/flaskp:latest .
+        
+      - name: Push to GHCR
+        run: docker push ghcr.io/${{ secrets.GITHUB_USERNAME }}/flaskp:latest
 
-      - name: push image
-        run: docker push ghcr.io/${{secrets.GITH_USERNAME}}/my-ci-cd:latest 
+      - name: Docker run
+        run: docker run -d --name testcont -p 5000:5000 ghcr.io/${{ secrets.GITHUB_USERNAME }}/flaskp:latest
 
-      - name: run container
-        run: docker run -d -p 5000:5000 --name testcont ghcr.io/${{secrets.GITH_USERNAME}}/my-ci-cd:latest
+      - name: Check working status
+        run: |
+          for i in {1..15}; do
+            if curl -sf http://localhost:5000; then
+              echo "Application working.."
+              exit 0
+            fi
+            echo "Waiting for application.."
+            sleep 3
+          done
+          echo "Application failed to start.."
+          exit 1
 
-      - name: check container
+      - name: Check running containers
         run: docker ps
 
-      - name: logs
+      - name: Check logs
         run: docker logs testcont
 
-      - name: wait for app
-        run: sleep 15
-
-      - name: stop container
-        run: docker stop testcont
-
-      - name: remove container
-        run: docker rm testcont
+      - name: Remove container
+        run: docker rm -f testcont
